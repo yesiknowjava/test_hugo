@@ -11,10 +11,10 @@ def create_service_md(zip_chunk_list):
         filepath = data_folder / file_name
         fileobj = open(filepath,"w+")
         l1 = "+++\n"
-        l2 = 'title= "Good Title\n"'
-        l3 = "date= "+curr_date+"\n"
-        l4 = "draft= false"+"\n"
-        l5 = 'category= "test"\n'
+        l2 = 'title = "Good Title"'+"\n"
+        l3 = "date = "+curr_date+"\n"
+        l4 = "draft = false"+"\n"
+        l5 = 'category = "test"\n'
                         
                             
         l7 = "+++"+"\n"
