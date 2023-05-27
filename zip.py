@@ -1,12 +1,13 @@
 import multiprocessing
+import os
 import time
 import datetime
 from pathlib import Path
 
-def create_service_md(zip_chunk_list):
+def create_service_md(zip_chunk_list, service):
     curr_date = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%dT%H:%M:%S")
     for zip_code in zip_chunk_list:
-        data_folder = Path("content/ziptest/")
+        data_folder = Path("content/"+service+"/")
         file_name = str(zip_code) + ".md"
         filepath = data_folder / file_name
         fileobj = open(filepath,"w+")
@@ -26,7 +27,7 @@ def create_service_md(zip_chunk_list):
 
 class ZipSplit():
     
-    __slots__ = ('slice_count', 'zip_list', 'errors')
+    __slots__ = ('slice_count', 'zip_list', 'errors', 'services')
 
     def generate_zip_list(self):
         data_folder = Path("zip.csv")
@@ -37,6 +38,7 @@ class ZipSplit():
         self.slice_count = 25
         self.zip_list = [] 
         self.errors = []
+        self.services = ['car-donation', 'junk-car'] # Add your services here
 
     def has_errors(self):
         if len(self.errors) > 0:
@@ -50,24 +52,29 @@ class ZipSplit():
         return zip_chunk
     
 def main():
-    from pathlib import Path
     obj = ZipSplit()
-    obj.generate_zip_list()
-    gen_obj = obj.split_zip_chunks()
-    processes = []
-    for zip_chunk in gen_obj:
-        zip_chunk_list = obj.yield_zip_chunk(zip_chunk)
-        print(zip_chunk_list, len(zip_chunk_list))
-        p = multiprocessing.Process(target=create_service_md, args=(zip_chunk_list,))
-        p.start()
-        processes.append(p)
 
-    # Joins all the processes
-    for p in processes:
-        p.join()
+    for service in obj.services:
+        data_folder = Path("content/"+service+"/")
+        os.makedirs(data_folder)
+        obj.generate_zip_list()
+        gen_obj = obj.split_zip_chunks()
+        processes = []
+        for zip_chunk in gen_obj:
+            zip_chunk_list = obj.yield_zip_chunk(zip_chunk)
+            p = multiprocessing.Process(target=create_service_md, args=(zip_chunk_list, service, ))
+            p.start()
+            processes.append(p)
+
+        # Joins all the processes
+        for p in processes:
+            p.join()
     print("Process Completed successfully")
 
 if __name__ == "__main__":
+    """
+    Add your services to self.services list
+    """
     t1 = time.time()
     main()
     t2 = time.time()
